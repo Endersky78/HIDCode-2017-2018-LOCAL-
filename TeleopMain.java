@@ -1,19 +1,19 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
-import com.qualcomm.robotcore.util.Range;
-
-import org.firstinspires.ftc.teamcode.Robot;
 
 @TeleOp(name="TeleopMain", group="Iterative Opmode")
 public class TeleopMain extends OpMode
 {
 
-    Robot robot = new Robot();
+    public DcMotor frontLeftW = null;
+    public DcMotor frontRightW = null;
+    public DcMotor backLeftW = null;
+    public DcMotor backRightW = null;
+    public DcMotor arm = null;
 
     private ElapsedTime runtime = new ElapsedTime();
 
@@ -21,7 +21,16 @@ public class TeleopMain extends OpMode
     public void init() {
         telemetry.addData("Status", "Initialized");
 
-        robot.init();
+        frontLeftW = hardwareMap.get(DcMotor.class, "FL");
+        frontRightW = hardwareMap.get(DcMotor.class, "FR");
+        backLeftW = hardwareMap.get(DcMotor.class, "BL");
+        backRightW = hardwareMap.get(DcMotor.class, "BR");
+        arm = hardwareMap.get(DcMotor.class, "arm");
+
+        frontLeftW.setDirection(DcMotor.Direction.REVERSE);
+        backLeftW.setDirection(DcMotor.Direction.REVERSE);
+        frontRightW.setDirection(DcMotor.Direction.FORWARD);
+        backRightW.setDirection(DcMotor.Direction.FORWARD);
 
         telemetry.addData("Status", "Initialized");
     }
@@ -31,9 +40,7 @@ public class TeleopMain extends OpMode
     }
 
     @Override
-    public void start() {
-        runtime.reset();
-    }
+    public void start() {runtime.reset();}
 
     @Override
     public void loop() {
@@ -43,18 +50,17 @@ public class TeleopMain extends OpMode
         leftPower  = -gamepad1.left_stick_y ;
         rightPower = -gamepad1.right_stick_y ;
 
-        robot.frontLeftW.setPower(leftPower);
-        robot.backLeftW.setPower(leftPower);
-        robot.frontRightW.setPower(rightPower);
-        robot.backRightW.setPower(rightPower);
+        frontLeftW.setPower(leftPower*0.75);
+        backLeftW.setPower(leftPower*0.75);
+        frontRightW.setPower(rightPower*0.75);
+        backRightW.setPower(rightPower*0.75);
+        arm.setPower(gamepad1.left_trigger*0.5);
 
         telemetry.addData("Status", "Run Time: " + runtime.toString());
         telemetry.addData("Motors", "left (%.2f), right (%.2f)", leftPower, rightPower);
     }
 
     @Override
-    public void stop() {
-        
-    }
+    public void stop() {}
 
 }
