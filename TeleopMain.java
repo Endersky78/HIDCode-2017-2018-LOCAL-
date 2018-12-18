@@ -4,6 +4,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 @TeleOp(name="TeleopMain", group="Iterative Opmode")
@@ -15,6 +16,7 @@ public class TeleopMain extends OpMode
     public DcMotor backLeftW = null;
     public DcMotor backRightW = null;
     public DcMotor arm = null;
+    public DcMotor lifter = null;
     public CRServo wristL = null;
     public CRServo wristR = null;
 
@@ -29,15 +31,16 @@ public class TeleopMain extends OpMode
         backLeftW = hardwareMap.get(DcMotor.class, "BL");
         backRightW = hardwareMap.get(DcMotor.class, "BR");
         arm = hardwareMap.get(DcMotor.class, "arm");
-        wristL = hardwareMap.get(CRServo.class, "WL");
-        wristR = hardwareMap.get(CRServo.class, "WR");
+        lifter = hardwareMap.get(DcMotor.class, "L");
+        wristL = hardwareMap.crservo.get("WL");
+        wristR = hardwareMap.crservo.get("WR");
 
-        frontLeftW.setDirection(DcMotor.Direction.REVERSE);
-        backLeftW.setDirection(DcMotor.Direction.REVERSE);
-        frontRightW.setDirection(DcMotor.Direction.FORWARD);
-        backRightW.setDirection(DcMotor.Direction.FORWARD);
-        wristL.setDirection(DcMotor.Direction.FORWARD);
-        wristR.setDirection(DcMotor.Direction.REVERSE);
+        frontLeftW.setDirection(DcMotor.Direction.FORWARD);
+        backLeftW.setDirection(DcMotor.Direction.FORWARD);
+        frontRightW.setDirection(DcMotor.Direction.REVERSE);
+        backRightW.setDirection(DcMotor.Direction.REVERSE);
+        wristL.setDirection(CRServo.Direction.FORWARD);
+        wristR.setDirection(CRServo.Direction.REVERSE);
 
         telemetry.addData("Status", "Initialized");
     }
@@ -53,36 +56,28 @@ public class TeleopMain extends OpMode
     public void loop() {
         double leftPower;
         double rightPower;
+        double armPower;
+        double wristPower;
 
-        leftPower  = -gamepad1.left_stick_y ;
-        rightPower = -gamepad1.right_stick_y ;
+        leftPower  = gamepad1.left_stick_y;
+        rightPower = gamepad1.right_stick_y;
+        armPower = gamepad2.left_stick_y * 0.5;
+        wristPower = gamepad2.right_stick_y;
 
         frontLeftW.setPower(leftPower*0.75);
         backLeftW.setPower(leftPower*0.75);
         frontRightW.setPower(rightPower*0.75);
         backRightW.setPower(rightPower*0.75);
+        arm.setPower(armPower);
+        wristL.setPower(wristPower);
+        wristR.setPower(wristPower);
+
         if(gamepad1.left_trigger > 0) {
-            arm.setPower(-gamepad1.left_trigger*0.25);
+            lifter.setPower(gamepad1.left_trigger);
         }
 
         else if(gamepad1.right_trigger > 0) {
-            arm.setPower(gamepad1.right_trigger*0.25);
-        }
-
-        else if(gamepad1.a) {
-            wristL.setPower(0.5);
-            wristR.setPower(0.5);
-        }
-
-        else if(gamepad1.y) {
-            wristL.setPower(-0.5);
-            wristR.setPower(-0.5);
-        }
-
-        else {
-            wristL.setPower(0);
-            wristR.setPower(0);
-            arm.setPower(-0.05);
+            lifter.setPower(-gamepad1.right_trigger);
         }
 
         telemetry.addData("Status", "Run Time: " + runtime.toString());
